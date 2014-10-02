@@ -11,7 +11,7 @@ Class {
 	#category : #PharoMiner
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 PharoVersionsMiner class >> forPharo30 [
 	"
 	self forPharo30
