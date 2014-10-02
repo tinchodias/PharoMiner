@@ -120,14 +120,14 @@ ConfigurationOfPharoMiner >> baseline01: spec [
 			project: 'LibGit' with: [
 				spec
 					className: #ConfigurationOfLibGit;
-					versionString: #'bleedingEdge';
+					versionString: #bleedingEdge;
 					repository: 'http://smalltalkhub.com/mc/FileSystemGitDev/LibGit2/main/' ].
 
 		spec
 			project: 'CI' with: [
 				spec
 					className: #ConfigurationOfCI;
-					versionString: #'bleedingEdge';
+					versionString: #stable;
 					repository: 'http://smalltalkhub.com/mc/Pharo/ci/main' ].
 
 		spec package: #PharoMiner with: [
