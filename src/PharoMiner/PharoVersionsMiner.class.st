@@ -6,7 +6,8 @@ Class {
 		'tags',
 		'repository',
 		'scriptByTag',
-		'versionNamesByTag'
+		'versionNamesByTag',
+		'timestampByTag'
 	],
 	#category : #PharoMiner
 }
@@ -82,6 +83,22 @@ PharoVersionsMiner >> prepareScriptByTag [
 ]
 
 { #category : #private }
+PharoVersionsMiner >> prepareTimestampByTag [
+
+	timestampByTag := Dictionary new.
+
+	updateByTag keysAndValuesDo: [ :aTag :update |
+		| commit |
+		commit := (repository lookup: 'refs/tags/', aTag) object.
+1halt.
+
+		commit commit_time: commit.
+		
+		timestampByTag at: aTag put: commit time				
+		]
+]
+
+{ #category : #private }
 PharoVersionsMiner >> prepareUpdateByTag [
 
 	updateByTag := Dictionary new.
@@ -108,12 +125,15 @@ PharoVersionsMiner >> prepareVersionNamesByTag [
 	versionNamesByTag := Dictionary new.
 
 	scriptByTag keysAndValuesDo: [ :aTag :script |
-		| scriptAST |
-		scriptAST := RBParser parseMethod: script onError: [ self error ].
+		| scriptAST fileNames versionNames |
+		scriptAST := RBParser parseMethod: script.
 		
-		versionNamesByTag 
-			at: aTag 
-			put: (scriptAST body statements first value receiver token value findTokens: String lf, String cr). 
+		fileNames := scriptAST body statements first value receiver token value findTokens: String lf, String cr.
+		versionNames := fileNames collect: [ :each | 
+			self assert: (each endsWith: '.mcz').
+			each allButLast: 4 "Remove the file extension" ].
+		
+		versionNamesByTag at: aTag put: versionNames. 
 		]
 ]
 
@@ -135,12 +155,24 @@ PharoVersionsMiner >> run [
 	self prepareUpdateByTag.
 	self prepareScriptByTag.
 	self prepareVersionNamesByTag.
+"	self prepareTimestampByTag."
 ]
 
 { #category : #accessing }
 PharoVersionsMiner >> scriptByTag [
 	
 	^ scriptByTag
+]
+
+{ #category : #querying }
+PharoVersionsMiner >> selectTagsForSlice: aMCVersion [ 
+
+	"Explanation: Each MCDependency represents a version proposed by the slice, so the ancestors hold the Pharo versions changed."
+	| originalVersionInfos originalVersionNames |
+	originalVersionInfos := aMCVersion dependencies flatCollect: [ :aMCDependency | aMCDependency versionInfo ancestors ].
+	originalVersionNames := originalVersionInfos collect: [ :each | each name ].
+	
+	^ self selectTagsWithAll: originalVersionNames
 ]
 
 { #category : #querying }
@@ -162,8 +194,29 @@ PharoVersionsMiner >> tags: anObject [
 	tags := anObject
 ]
 
+{ #category : #private }
+PharoVersionsMiner >> timestampAt: aPath from: rootObject ifPresent: presentBlock ifAbsent: absentBlock [
+
+	| blob |
+	blob := LGitObject of: repository.
+
+	^ (blob 
+		object_lookup_bypath: blob 
+		treeish: rootObject
+		path: aPath
+		type: (LG2GitOtypeE at: #GIT_OBJ_BLOB)) = 0 
+		ifTrue: [ presentBlock value: blob concreteObject contents ]
+		ifFalse: absentBlock
+]
+
 { #category : #accessing }
 PharoVersionsMiner >> updateByTag [
 	
 	^ updateByTag
+]
+
+{ #category : #accessing }
+PharoVersionsMiner >> versionNamesByTag [
+	
+	^ versionNamesByTag
 ]

@@ -14,6 +14,25 @@ Class {
 	#category : #PharoMiner
 }
 
+{ #category : #utils }
+PharoSlicesMiner class >> downloadSlicesToCacheFrom: anMCHttpRepository [
+	"
+	self downloadSlicesToCacheFrom: self pharo30InboxRepository.
+	"
+
+	| fileNames |
+	fileNames := 
+		anMCHttpRepository allVersionNames 
+			select: [ :each | each beginsWith: 'SLICE' ] 
+			thenCollect: [ :each | each, '.mcz' ].
+	
+	fileNames 
+		do: [ :aFileName | 
+			(MCCacheRepository uniqueInstance includesFileNamed: aFileName)
+				ifFalse: [ anMCHttpRepository readStreamForFileNamed: aFileName do: [ :e | ] ] ]
+		displayingProgress: [ 'Downloading Slices (total: ', fileNames size asString, ')' ]
+]
+
 { #category : #'instance creation' }
 PharoSlicesMiner class >> forPharo30 [
 	"
@@ -21,12 +40,14 @@ PharoSlicesMiner class >> forPharo30 [
 	"
 
 	^ self new 
-		repository:
-			(MCHttpRepository
-				location: 'http://smalltalkhub.com/mc/Pharo/Pharo30Inbox/main'
-				user: ''
-				password: '');
+		repository: MCCacheRepository uniqueInstance "self pharo30InboxRepository";
 		yourself.
+]
+
+{ #category : #utils }
+PharoSlicesMiner class >> pharo30InboxRepository [
+		
+	^ MCSmalltalkhubRepository owner: 'Pharo' project: 'Pharo30Inbox'
 ]
 
 { #category : #querying }
