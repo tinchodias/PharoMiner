@@ -32,6 +32,13 @@ PharoVersionsMiner class >> forPharo30 [
 ]
 
 { #category : #private }
+PharoVersionsMiner >> bestTagForTimestamp: aDateAndTime [
+
+	^ ((self selectTimestampByTagPreviousTo: aDateAndTime) associations detectMin: [ :each | 
+		aDateAndTime - each value ]) key
+]
+
+{ #category : #private }
 PharoVersionsMiner >> contentAt: aPath from: rootObject ifPresent: presentBlock ifAbsent: absentBlock [
 
 	| blob |
@@ -90,12 +97,8 @@ PharoVersionsMiner >> prepareTimestampByTag [
 	updateByTag keysAndValuesDo: [ :aTag :update |
 		| commit |
 		commit := (repository lookup: 'refs/tags/', aTag) object.
-1halt.
-
-		commit commit_time: commit.
 		
-		timestampByTag at: aTag put: commit time				
-		]
+		timestampByTag at: aTag put: commit time asDateAndTime ]
 ]
 
 { #category : #private }
@@ -155,7 +158,7 @@ PharoVersionsMiner >> run [
 	self prepareUpdateByTag.
 	self prepareScriptByTag.
 	self prepareVersionNamesByTag.
-"	self prepareTimestampByTag."
+	self prepareTimestampByTag.
 ]
 
 { #category : #accessing }
@@ -180,6 +183,12 @@ PharoVersionsMiner >> selectTagsWithAll: queriedVersionNames [
 
 	^ (versionNamesByTag select: [ :versionNames |
 		versionNames includesAll: queriedVersionNames ]) keys
+]
+
+{ #category : #private }
+PharoVersionsMiner >> selectTimestampByTagPreviousTo: aDateAndTime [
+	
+	^ timestampByTag select: [ :each | each <= aDateAndTime ]
 ]
 
 { #category : #accessing }

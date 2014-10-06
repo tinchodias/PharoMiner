@@ -68,6 +68,13 @@ PharoSlicesMiner >> arrayOfSamples [
 			thenSelect: #isNotNil. ]
 ]
 
+{ #category : #querying }
+PharoSlicesMiner >> bestVersionAt: anEvent [
+
+	^ (self versionsAtEvent: anEvent) detectMin: [ :each | 
+		(anEvent date - each info timeStamp ) abs ]
+]
+
 { #category : #accessing }
 PharoSlicesMiner >> bigGap [
 
@@ -127,6 +134,12 @@ PharoSlicesMiner >> versions [
 
 	^ versions ifNil: [ versions :=
 		self sliceNames collect: [ :name | repository versionFromFileNamed: name, '.mcz' ] ]
+]
+
+{ #category : #querying }
+PharoSlicesMiner >> versionsAtEvent: anEvent [
+
+	^ self versionsByNumber at: anEvent case id asString
 ]
 
 { #category : #querying }

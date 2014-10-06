@@ -75,6 +75,27 @@ PharoFogBugzMiner >> issueNumbers: anObject [
 	issueNumbers := anObject
 ]
 
+{ #category : #private }
+PharoFogBugzMiner >> resolvedFRNEventDescription [
+
+	^ 'Resolved (Fix Review Needed)'
+]
+
+{ #category : #querying }
+PharoFogBugzMiner >> resolvedFRNEvents [
+	"FRN = Fix Review Needed"
+
+	| resolvedEvents |
+	resolvedEvents := OrderedCollection new.
+
+	self caseByNumber do: [ :case |
+		case events do: [ :each | 
+			(each description beginsWith: self resolvedFRNEventDescription)
+				ifTrue: [ resolvedEvents add: each ] ] ].
+
+	^ resolvedEvents
+]
+
 { #category : #running }
 PharoFogBugzMiner >> run [
 	"Retrieve information from FogBugz. It might be needed to #run mor ethan once."
