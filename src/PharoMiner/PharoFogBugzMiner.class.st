@@ -96,6 +96,13 @@ PharoFogBugzMiner >> resolvedFRNEvents [
 	^ resolvedEvents
 ]
 
+{ #category : #querying }
+PharoFogBugzMiner >> resolvedFRNEventsAfter: aDateAndTime [
+	"FRN = Fix Review Needed"
+
+	^ self resolvedFRNEvents select: [ :each | each date > aDateAndTime ]
+]
+
 { #category : #running }
 PharoFogBugzMiner >> run [
 	"Retrieve information from FogBugz. It might be needed to #run mor ethan once."

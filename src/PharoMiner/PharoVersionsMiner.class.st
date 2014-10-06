@@ -219,6 +219,12 @@ PharoVersionsMiner >> timestampAt: aPath from: rootObject ifPresent: presentBloc
 ]
 
 { #category : #accessing }
+PharoVersionsMiner >> timestampByTag [
+	
+	^ timestampByTag
+]
+
+{ #category : #accessing }
 PharoVersionsMiner >> updateByTag [
 	
 	^ updateByTag
