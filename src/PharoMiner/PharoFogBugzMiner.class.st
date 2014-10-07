@@ -97,10 +97,38 @@ PharoFogBugzMiner >> resolvedFRNEvents [
 ]
 
 { #category : #querying }
-PharoFogBugzMiner >> resolvedFRNEventsAfter: aDateAndTime [
+PharoFogBugzMiner >> resolvedFRNEventsIn: aTimespan [
 	"FRN = Fix Review Needed"
 
-	^ self resolvedFRNEvents select: [ :each | each date > aDateAndTime ]
+	^ self resolvedFRNEvents select: [ :each | aTimespan includes: each date ]
+]
+
+{ #category : #private }
+PharoFogBugzMiner >> resolvedFTIEventDescription [
+
+	^ 'Resolved (Fix To Include)'
+]
+
+{ #category : #querying }
+PharoFogBugzMiner >> resolvedFTIEvents [
+	"FTI = Fix To Include"
+
+	| resolvedEvents |
+	resolvedEvents := OrderedCollection new.
+
+	self caseByNumber do: [ :case |
+		case events do: [ :each | 
+			(each description beginsWith: self resolvedFTIEventDescription)
+				ifTrue: [ resolvedEvents add: each ] ] ].
+
+	^ resolvedEvents
+]
+
+{ #category : #querying }
+PharoFogBugzMiner >> resolvedFTIEventsIn: aTimespan [
+	"FTI = Fix To Include"
+
+	^ self resolvedFTIEvents select: [ :each | aTimespan includes: each date ]
 ]
 
 { #category : #running }

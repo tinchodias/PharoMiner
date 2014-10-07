@@ -141,6 +141,16 @@ PharoVersionsMiner >> prepareVersionNamesByTag [
 ]
 
 { #category : #accessing }
+PharoVersionsMiner >> reliableTimeSpanInPharo30 [
+	"Explanation:
+	- github/pharo-core has wrong timestamps before this tag: 30457.
+	- (current) last version is 30858
+	"
+
+	^ (self timestampByTag at: '30457') to: (self timestampByTag at: '30858').
+]
+
+{ #category : #accessing }
 PharoVersionsMiner >> repository [
 	
 	^ repository
