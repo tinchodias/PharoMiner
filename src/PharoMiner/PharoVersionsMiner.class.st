@@ -4,10 +4,10 @@ Class {
 	#instVars : [
 		'updateByTag',
 		'tags',
-		'repository',
 		'scriptByTag',
 		'versionNamesByTag',
-		'timestampByTag'
+		'timestampByTag',
+		'pharoCoreGitRepositoryPath'
 	],
 	#category : #PharoMiner
 }
@@ -18,14 +18,12 @@ PharoVersionsMiner class >> forPharo30 [
 	self forPharo30
 	"
 
-	| repository tags tags30 |
-	repository := (LGitRepository on: '/Users/tinchodias/dev/pharo-core/pharo-core' asFileReference) open; yourself.
-
+	| tags tags30 |
 	tags := '/Users/tinchodias/dev/pharo-core/pharo-core/tags.txt' asFileReference contents lines.
 	tags30 := tags select: [ :each | each beginsWith: '30' ].
 
 	^ self new
-		repository: repository;
+		pharoCoreGitRepositoryPath: '/Users/tinchodias/dev/pharo-core/pharo-core' ;
 		tags: tags30;
 		run;
 		yourself.
@@ -42,7 +40,7 @@ PharoVersionsMiner >> bestTagForTimestamp: aDateAndTime [
 PharoVersionsMiner >> contentAt: aPath from: rootObject ifPresent: presentBlock ifAbsent: absentBlock [
 
 	| blob |
-	blob := LGitObject of: repository.
+	blob := LGitObject of: self repository.
 
 	^ (blob 
 		object_lookup_bypath: blob 
@@ -66,6 +64,12 @@ PharoVersionsMiner >> contentAtAnyOf: paths from: rootObject ifPresent: presentB
 	^ absentBlock value
 ]
 
+{ #category : #accessing }
+PharoVersionsMiner >> pharoCoreGitRepositoryPath: aString [ 
+
+	pharoCoreGitRepositoryPath := aString
+]
+
 { #category : #private }
 PharoVersionsMiner >> prepareScriptByTag [
 
@@ -73,7 +77,7 @@ PharoVersionsMiner >> prepareScriptByTag [
 
 	updateByTag keysAndValuesDo: [ :aTag :update |
 		| commit possiblePathsForScript scriptSelector |
-		commit := (repository lookup: 'refs/tags/', aTag) object.
+		commit := (self repository lookup: 'refs/tags/', aTag) object.
 
 		scriptSelector := (RBParser parseMethod: update onError: [ self error ]) sentMessages detect: [ :each | each beginsWith: #script ].
 
@@ -96,7 +100,7 @@ PharoVersionsMiner >> prepareTimestampByTag [
 
 	updateByTag keysAndValuesDo: [ :aTag :update |
 		| commit |
-		commit := (repository lookup: 'refs/tags/', aTag) object.
+		commit := (self repository lookup: 'refs/tags/', aTag) object.
 		
 		timestampByTag at: aTag put: commit time asDateAndTime ]
 ]
@@ -108,7 +112,7 @@ PharoVersionsMiner >> prepareUpdateByTag [
 
 	tags do: [ :aTag |
 		| commit possiblePathsForUpdate |
-		commit := (repository lookup: 'refs/tags/', aTag) object.
+		commit := (self repository lookup: 'refs/tags/', aTag) object.
 
 		possiblePathsForUpdate := { 
 			'ScriptLoader30/ScriptLoader.cls/instance/pharo - updates/update', aTag, '.st'.
@@ -153,13 +157,7 @@ PharoVersionsMiner >> reliableTimeSpanInPharo30 [
 { #category : #accessing }
 PharoVersionsMiner >> repository [
 	
-	^ repository
-]
-
-{ #category : #accessing }
-PharoVersionsMiner >> repository: anObject [
-	
-	repository := anObject
+	^ (LGitRepository on: pharoCoreGitRepositoryPath asFileReference) open; yourself
 ]
 
 { #category : #running }
@@ -217,7 +215,7 @@ PharoVersionsMiner >> tags: anObject [
 PharoVersionsMiner >> timestampAt: aPath from: rootObject ifPresent: presentBlock ifAbsent: absentBlock [
 
 	| blob |
-	blob := LGitObject of: repository.
+	blob := LGitObject of: self repository.
 
 	^ (blob 
 		object_lookup_bypath: blob 

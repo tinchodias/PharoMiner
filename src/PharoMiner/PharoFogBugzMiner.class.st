@@ -6,24 +6,44 @@ Class {
 		'issueNumbers',
 		'caseByNumber'
 	],
+	#classInstVars : [
+		'defaultEmail',
+		'defaultPassword'
+	],
 	#category : #PharoMiner
 }
 
-{ #category : #example }
-PharoFogBugzMiner class >> example [
+{ #category : #accessing }
+PharoFogBugzMiner class >> defaultEmail [
+
+	^ defaultEmail ifNil: [ 
+		defaultEmail := UIManager default request: 'Email for user identification in Fogbugz tracker' ]
+]
+
+{ #category : #accessing }
+PharoFogBugzMiner class >> defaultPassword [
+
+	^ defaultPassword ifNil: [ 
+		defaultPassword := UIManager default requestPassword: 'Password for user identification in Fogbugz tracker' ]
+]
+
+{ #category : #accessing }
+PharoFogBugzMiner class >> defaultTracker [
+		
+	^ FogBugzTracker pharo 
+		logOnWithEmail: self defaultEmail 
+		password: self defaultPassword
+]
+
+{ #category : #'instance creation' }
+PharoFogBugzMiner class >> forPharo30 [
 	"
-	self example
+	self forPharo30
 	"
-	
-	| slicesMiner |
-	slicesMiner := PharoSlicesMiner forPharo30.
-	
+		
 	^ self new
-		tracker: 
-			(FogBugzTracker pharo 
-				logOnWithEmail: 'tinchodias@gmail.com' 
-				password: '147147');
-		issueNumbers: slicesMiner versionsByNumber keys
+		tracker: self defaultTracker;
+		issueNumbers: PharoSlicesMiner forPharo30 versionsByNumber keys;
 		yourself
 ]
 
