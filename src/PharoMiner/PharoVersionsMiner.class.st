@@ -64,6 +64,15 @@ PharoVersionsMiner >> contentAtAnyOf: paths from: rootObject ifPresent: presentB
 	^ absentBlock value
 ]
 
+{ #category : #convenience }
+PharoVersionsMiner >> fileOutVersionNamesByTag [
+
+	'versionNamesByTag.ston' asFileReference writeStreamDo: [ :stream |
+		#STON asClass
+			put: self versionNamesByTag
+			onStreamPretty: stream ]
+]
+
 { #category : #accessing }
 PharoVersionsMiner >> pharoCoreGitRepositoryPath: aString [ 
 
