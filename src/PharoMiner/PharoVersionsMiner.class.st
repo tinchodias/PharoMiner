@@ -18,13 +18,40 @@ PharoVersionsMiner class >> forPharo30 [
 	self forPharo30
 	"
 
-	| tags tags30 |
-	tags := '/Users/tinchodias/dev/pharo-core/pharo-core/tags.txt' asFileReference contents lines.
-	tags30 := tags select: [ :each | each beginsWith: '30' ].
+	^ self forPharoTagPattern: '30*'
+]
+
+{ #category : #'instance creation' }
+PharoVersionsMiner class >> forPharo40 [
+	"
+	self forPharo40.
+	self forPharo40 fileOutVersionNamesByTag.
+	"
+
+	^ self forPharoTagPattern: '40*'
+]
+
+{ #category : #'instance creation' }
+PharoVersionsMiner class >> forPharoTagPattern: pharoTagPattern [
+
+	| pharoGitRepoPath tagsFile tags |
+	pharoGitRepoPath := 'pharo-core'.
+	pharoGitRepoPath asFileReference exists ifFalse: [
+		self error: pharoGitRepoPath, ' does not exist. Generate it like:
+	git clone git@github.com:pharo-project/pharo-core.git' ].
+
+	tagsFile := 'PharoTags.txt' asFileReference.
+	
+	tagsFile exists ifFalse: [
+		self error: tagsFile asString, ' does not exist. Generate it like:
+	cd pharo-core
+	git tag --list > ../PharoTags.txt' ].
+	
+	tags := tagsFile contents lines select: [ :each | pharoTagPattern match: each ].
 
 	^ self new
-		pharoCoreGitRepositoryPath: '/Users/tinchodias/dev/pharo-core/pharo-core' ;
-		tags: tags30;
+		pharoCoreGitRepositoryPath: pharoGitRepoPath;
+		tags: tags;
 		run;
 		yourself.
 ]
@@ -67,6 +94,14 @@ PharoVersionsMiner >> contentAtAnyOf: paths from: rootObject ifPresent: presentB
 { #category : #convenience }
 PharoVersionsMiner >> fileOutVersionNamesByTag [
 
+	"
+	Gofer it
+		url: 'http://ss3.gemstone.com/ss/STON';
+		configurationOf: 'Ston';
+		load.
+	#ConfigurationOfSton asClass load.
+	"
+
 	'versionNamesByTag.ston' asFileReference writeStreamDo: [ :stream |
 		#STON asClass
 			put: self versionNamesByTag
@@ -92,7 +127,8 @@ PharoVersionsMiner >> prepareScriptByTag [
 
 		possiblePathsForScript := { 
 			'ScriptLoader30/ScriptLoader.cls/instance/pharo - scripts/', scriptSelector, '.st'.
-			'ScriptLoader30.package/ScriptLoader.class/instance/pharo - scripts/', scriptSelector, '.st' }.
+			'ScriptLoader30.package/ScriptLoader.class/instance/pharo - scripts/', scriptSelector, '.st'.
+			'ScriptLoader40.package/ScriptLoader.class/instance/pharo - scripts/', scriptSelector, '.st' }.
 
 		self 
 			contentAtAnyOf: possiblePathsForScript
@@ -125,7 +161,8 @@ PharoVersionsMiner >> prepareUpdateByTag [
 
 		possiblePathsForUpdate := { 
 			'ScriptLoader30/ScriptLoader.cls/instance/pharo - updates/update', aTag, '.st'.
-			'ScriptLoader30.package/ScriptLoader.class/instance/pharo - updates/update', aTag, '.st' }.
+			'ScriptLoader30.package/ScriptLoader.class/instance/pharo - updates/update', aTag, '.st'.
+			'ScriptLoader40.package/ScriptLoader.class/instance/pharo - updates/update', aTag, '.st' }.
 
 		self 
 			contentAtAnyOf: possiblePathsForUpdate
