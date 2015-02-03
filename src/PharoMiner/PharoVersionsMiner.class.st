@@ -22,6 +22,15 @@ PharoVersionsMiner class >> forPharo30 [
 ]
 
 { #category : #'instance creation' }
+PharoVersionsMiner class >> forPharo30subset [
+	"
+	self forPharo30subset.
+	"
+
+	^ self forPharoTagPattern: '303*'
+]
+
+{ #category : #'instance creation' }
 PharoVersionsMiner class >> forPharo40 [
 	"
 	self forPharo40.
@@ -74,7 +83,7 @@ PharoVersionsMiner >> contentAt: aPath from: rootObject ifPresent: presentBlock 
 		treeish: rootObject
 		path: aPath
 		type: (LG2GitOtypeE at: #GIT_OBJ_BLOB)) = 0 
-		ifTrue: [ presentBlock value: blob concreteObject contents ]
+		ifTrue: [ presentBlock value: blob concreteObject rawBuffer readString ]
 		ifFalse: absentBlock
 ]
 
@@ -255,21 +264,6 @@ PharoVersionsMiner >> tags [
 PharoVersionsMiner >> tags: anObject [
 	
 	tags := anObject
-]
-
-{ #category : #private }
-PharoVersionsMiner >> timestampAt: aPath from: rootObject ifPresent: presentBlock ifAbsent: absentBlock [
-
-	| blob |
-	blob := LGitObject of: self repository.
-
-	^ (blob 
-		object_lookup_bypath: blob 
-		treeish: rootObject
-		path: aPath
-		type: (LG2GitOtypeE at: #GIT_OBJ_BLOB)) = 0 
-		ifTrue: [ presentBlock value: blob concreteObject contents ]
-		ifFalse: absentBlock
 ]
 
 { #category : #accessing }
