@@ -130,8 +130,16 @@ ConfigurationOfPharoMiner >> baseline01: spec [
 					versionString: #stable;
 					repository: 'http://smalltalkhub.com/mc/Pharo/ci/main' ].
 
+		spec package: #PharoVersionsMiner with: [
+			spec requires: #('LibGit') ].
 		spec package: #PharoMiner with: [
-			spec requires: #('CI' 'LibGit') ]. ].
+			spec requires: #('CI' 'PharoVersionsMiner') ].
+		
+		spec
+			group: 'default' with: #('PharoMiner');
+			group: 'core' with: #('PharoVersionsMiner').
+	
+	 ].
 
 ]
 
