@@ -7,7 +7,8 @@ Class {
 		'scriptByTag',
 		'versionNamesByTag',
 		'timestampByTag',
-		'pharoCoreGitRepositoryPath'
+		'pharoCoreGitRepositoryPath',
+		'issuesByTag'
 	],
 	#category : #PharoMiner
 }
@@ -43,20 +44,14 @@ PharoVersionsMiner class >> forPharo40 [
 { #category : #'instance creation' }
 PharoVersionsMiner class >> forPharoTagPattern: pharoTagPattern [
 
-	| pharoGitRepoPath tagsFile tags |
+	| pharoGitRepoPath repository tags |
 	pharoGitRepoPath := 'pharo-core'.
 	pharoGitRepoPath asFileReference exists ifFalse: [
 		self error: pharoGitRepoPath, ' does not exist. Generate it like:
 	git clone git@github.com:pharo-project/pharo-core.git' ].
 
-	tagsFile := 'PharoTags.txt' asFileReference.
-	
-	tagsFile exists ifFalse: [
-		self error: tagsFile asString, ' does not exist. Generate it like:
-	cd pharo-core
-	git tag --list > ../PharoTags.txt' ].
-	
-	tags := tagsFile contents lines select: [ :each | pharoTagPattern match: each ].
+	repository := (LGitRepository on: pharoGitRepoPath asFileReference) open; yourself.
+	tags :=  repository tags select: [ :each | pharoTagPattern match: each ].
 
 	^ self new
 		pharoCoreGitRepositoryPath: pharoGitRepoPath;
@@ -82,7 +77,7 @@ PharoVersionsMiner >> contentAt: aPath from: rootObject ifPresent: presentBlock 
 		object_lookup_bypath: blob 
 		treeish: rootObject
 		path: aPath
-		type: (LG2GitOtypeE at: #GIT_OBJ_BLOB)) = 0 
+		type: LGitObjectTypeEnum GIT_OBJ_BLOB) = 0 
 		ifTrue: [ presentBlock value: blob concreteObject rawBuffer readString ]
 		ifFalse: absentBlock
 ]
@@ -121,6 +116,19 @@ PharoVersionsMiner >> fileOutVersionNamesByTag [
 PharoVersionsMiner >> pharoCoreGitRepositoryPath: aString [ 
 
 	pharoCoreGitRepositoryPath := aString
+]
+
+{ #category : #private }
+PharoVersionsMiner >> prepareIssuesByTag [
+
+	issuesByTag := Dictionary new.
+
+	updateByTag keysAndValuesDo: [ :aTag :update |
+		| urls issues |
+		urls := update allRegexMatches: 'pharo\.fogbugz\.com/f/cases/\d\d\d\d\d'.
+		issues := urls collect: [ :each | each last: 5 ].
+		
+		issuesByTag at: aTag put: issues ]
 ]
 
 { #category : #private }
@@ -190,7 +198,7 @@ PharoVersionsMiner >> prepareVersionNamesByTag [
 		| scriptAST fileNames versionNames |
 		scriptAST := RBParser parseMethod: script.
 		
-		fileNames := scriptAST body statements first value receiver token value findTokens: String lf, String cr.
+		fileNames := scriptAST body statements first value receiver value findTokens: String lf, String cr.
 		versionNames := fileNames collect: [ :each | 
 			self assert: (each endsWith: '.mcz').
 			each allButLast: 4 "Remove the file extension" ].
@@ -222,6 +230,7 @@ PharoVersionsMiner >> run [
 	self prepareScriptByTag.
 	self prepareVersionNamesByTag.
 	self prepareTimestampByTag.
+	self prepareIssuesByTag.
 ]
 
 { #category : #accessing }
