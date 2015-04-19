@@ -8,7 +8,8 @@ Class {
 		'versionNamesByTag',
 		'timestampByTag',
 		'pharoCoreGitRepositoryPath',
-		'issuesByTag'
+		'issuesByTag',
+		'tagByHexId'
 	],
 	#category : #PharoMiner
 }
@@ -68,6 +69,12 @@ PharoVersionsMiner >> bestTagForTimestamp: aDateAndTime [
 ]
 
 { #category : #private }
+PharoVersionsMiner >> commitForTag: aTag [
+	
+	^ (self repository lookup: 'refs/tags/', aTag) object
+]
+
+{ #category : #private }
 PharoVersionsMiner >> contentAt: aPath from: rootObject ifPresent: presentBlock ifAbsent: absentBlock [
 
 	| blob |
@@ -110,6 +117,49 @@ PharoVersionsMiner >> fileOutVersionNamesByTag [
 		#STON asClass
 			put: self versionNamesByTag
 			onStreamPretty: stream ]
+]
+
+{ #category : #private }
+PharoVersionsMiner >> firstTaggedCommitStartingAt: aLGitCommit [ 
+
+	| currentCommit |
+	currentCommit := aLGitCommit.
+	
+	[ self isTaggedCommit: currentCommit ] whileFalse: [ 
+		self assert: currentCommit parents size = 1. "not yet implemented"
+		
+		currentCommit := currentCommit parents anyOne ].
+	
+	^ currentCommit 
+]
+
+{ #category : #private }
+PharoVersionsMiner >> isTaggedCommit: aLGitCommit [ 
+	
+	^ self tagByHexId includesKey: aLGitCommit id hexString
+]
+
+{ #category : #accessing }
+PharoVersionsMiner >> parentTagsByTag [
+
+	| parentTagsByTag |
+	parentTagsByTag := SmallDictionary new.
+
+	tags do: [ :aTag |
+		| parentTags |
+		parentTags := self parentTagsForTag: aTag.
+		
+		parentTagsByTag at: aTag put: parentTags. 
+		].
+	
+	^ parentTagsByTag
+]
+
+{ #category : #private }
+PharoVersionsMiner >> parentTagsForTag: aTag [
+
+	^ (self commitForTag: aTag) parents collect: [ :parentCommit | 
+		self tagByHexId at: (self firstTaggedCommitStartingAt: parentCommit) id hexString ]
 ]
 
 { #category : #accessing }
@@ -162,7 +212,7 @@ PharoVersionsMiner >> prepareTimestampByTag [
 
 	updateByTag keysAndValuesDo: [ :aTag :update |
 		| commit |
-		commit := (self repository lookup: 'refs/tags/', aTag) object.
+		commit := self commitForTag: aTag.
 		
 		timestampByTag at: aTag put: commit time asDateAndTime ]
 ]
@@ -261,6 +311,26 @@ PharoVersionsMiner >> selectTagsWithAll: queriedVersionNames [
 PharoVersionsMiner >> selectTimestampByTagPreviousTo: aDateAndTime [
 	
 	^ timestampByTag select: [ :each | each <= aDateAndTime ]
+]
+
+{ #category : #accessing }
+PharoVersionsMiner >> tagByHexId [
+	"Note: I collect id for ALL tags in the repository, not only the ones in the inst var 'tags'."
+	
+	tagByHexId ifNotNil: [ ^ tagByHexId ].
+	
+	tagByHexId := Dictionary new.
+
+	self repository tags do: [ :aTag |
+		[| hexId |
+		hexId := (self commitForTag: aTag) id hexString.
+		
+		tagByHexId at: hexId put: aTag. ] 
+			on: NotFound 
+			do: [ :error | self inform: aTag asString, ' not found in #tagByHexId' ]
+		].
+	
+	^ tagByHexId
 ]
 
 { #category : #accessing }
