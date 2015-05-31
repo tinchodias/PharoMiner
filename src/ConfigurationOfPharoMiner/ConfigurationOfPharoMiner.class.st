@@ -116,12 +116,10 @@ ConfigurationOfPharoMiner >> baseline01: spec [
 		spec blessing: #'baseline'.
 		spec repository: 'http://smalltalkhub.com/mc/MartinDias/PharoMiner/main/'.
 
-		spec 
-			project: 'LibGit' with: [
-				spec
-					className: #ConfigurationOfLibGit;
-					versionString: #bleedingEdge;
-					repository: 'http://smalltalkhub.com/mc/FileSystemGitDev/LibGit2/main/' ].
+		spec baseline: 'LibGit' with: [
+			spec 
+				repository: 'github://theseion/LibGit:master';
+				loads: #('development') ].
 
 		spec
 			project: 'CI' with: [
