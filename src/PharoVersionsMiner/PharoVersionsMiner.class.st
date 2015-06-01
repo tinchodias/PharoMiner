@@ -43,6 +43,12 @@ PharoVersionsMiner class >> forPharo40 [
 ]
 
 { #category : #'instance creation' }
+PharoVersionsMiner class >> forPharo50 [
+
+	^ self forPharoTagPattern: '50*'
+]
+
+{ #category : #'instance creation' }
 PharoVersionsMiner class >> forPharoTagPattern: pharoTagPattern [
 
 	| pharoGitRepoPath repository tags |
@@ -191,7 +197,8 @@ PharoVersionsMiner >> prepareScriptByTag [
 		possiblePathsForScript := { 
 			'ScriptLoader30/ScriptLoader.cls/instance/pharo - scripts/', scriptSelector, '.st'.
 			'ScriptLoader30.package/ScriptLoader.class/instance/pharo - scripts/', scriptSelector, '.st'.
-			'ScriptLoader40.package/ScriptLoader.class/instance/pharo - scripts/', scriptSelector, '.st' }.
+			'ScriptLoader40.package/ScriptLoader.class/instance/pharo - scripts/', scriptSelector, '.st'.
+			'ScriptLoader50.package/ScriptLoader.class/instance/pharo - scripts/', scriptSelector, '.st' }.
 
 		self 
 			contentAtAnyOf: possiblePathsForScript
@@ -225,7 +232,8 @@ PharoVersionsMiner >> prepareUpdateByTag [
 		possiblePathsForUpdate := { 
 			'ScriptLoader30/ScriptLoader.cls/instance/pharo - updates/update', aTag, '.st'.
 			'ScriptLoader30.package/ScriptLoader.class/instance/pharo - updates/update', aTag, '.st'.
-			'ScriptLoader40.package/ScriptLoader.class/instance/pharo - updates/update', aTag, '.st' }.
+			'ScriptLoader40.package/ScriptLoader.class/instance/pharo - updates/update', aTag, '.st'.
+			'ScriptLoader50.package/ScriptLoader.class/instance/pharo - updates/update', aTag, '.st' }.
 
 		self 
 			contentAtAnyOf: possiblePathsForUpdate
