@@ -75,27 +75,23 @@ PharoVersionsMiner >> commitForTag: aTag [
 ]
 
 { #category : #private }
-PharoVersionsMiner >> contentAt: aPath from: rootObject ifPresent: presentBlock ifAbsent: absentBlock [
+PharoVersionsMiner >> contentAt: aPath from: aLGitCommit ifPresent: presentBlock ifAbsent: absentBlock [
 
-	| blob |
-	blob := LGitObject of: self repository.
-
-	^ (blob 
-		object_lookup_bypath: blob 
-		treeish: rootObject
-		path: aPath
-		type: LGitObjectTypeEnum GIT_OBJ_BLOB) = 0 
-		ifTrue: [ presentBlock value: blob concreteObject rawBuffer readString ]
-		ifFalse: absentBlock
+	^ aLGitCommit
+		lookupByPath: aPath
+		type: LGitObjectTypeEnum GIT_OBJ_BLOB
+		ifPresent: [ :blob |
+			presentBlock cull: blob rawBuffer readString ]
+		ifAbsent: absentBlock
 ]
 
 { #category : #private }
-PharoVersionsMiner >> contentAtAnyOf: paths from: rootObject ifPresent: presentBlock ifAbsent: absentBlock [
+PharoVersionsMiner >> contentAtAnyOf: paths from: aLGitCommit ifPresent: presentBlock ifAbsent: absentBlock [
 
 	paths do: [ :aPath |
 		self 
 			contentAt: aPath 
-			from: rootObject 
+			from: aLGitCommit 
 			ifPresent: [ :contents | ^ presentBlock value: contents ] 
 			ifAbsent: [  ] ].
 		
@@ -199,7 +195,7 @@ PharoVersionsMiner >> prepareScriptByTag [
 
 		self 
 			contentAtAnyOf: possiblePathsForScript
-			from: commit tree 
+			from: commit
 			ifPresent: [ :contents | scriptByTag at: aTag put: contents ] 
 			ifAbsent: [ ].
 		]
@@ -233,7 +229,7 @@ PharoVersionsMiner >> prepareUpdateByTag [
 
 		self 
 			contentAtAnyOf: possiblePathsForUpdate
-			from: commit tree 
+			from: commit
 			ifPresent: [ :contents | updateByTag at: aTag put: contents ] 
 			ifAbsent: [ ].
 		]
