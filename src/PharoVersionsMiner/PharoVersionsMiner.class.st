@@ -81,7 +81,7 @@ PharoVersionsMiner >> contentAt: aPath from: aLGitCommit ifPresent: presentBlock
 		lookupByPath: aPath
 		type: LGitObjectTypeEnum GIT_OBJ_BLOB
 		ifPresent: [ :blob |
-			presentBlock cull: blob rawBuffer readString ]
+			presentBlock cull: blob contents ]
 		ifAbsent: absentBlock
 ]
 
