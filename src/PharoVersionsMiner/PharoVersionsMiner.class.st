@@ -15,56 +15,69 @@ Class {
 }
 
 { #category : #'instance creation' }
+PharoVersionsMiner class >> forAllPharos [
+
+	^ self forPharoTagRegex: '30\d\d\d|40\d\d\d|50\d\d\d' asRegex
+]
+
+{ #category : #'instance creation' }
 PharoVersionsMiner class >> forPharo30 [
 	"
 	self forPharo30
 	"
 
-	^ self forPharoTagPattern: '30*'
-]
-
-{ #category : #'instance creation' }
-PharoVersionsMiner class >> forPharo30subset [
-	"
-	self forPharo30subset.
-	"
-
-	^ self forPharoTagPattern: '303*'
+	^ self forPharoTagRegex: '30\d\d\d' asRegex
 ]
 
 { #category : #'instance creation' }
 PharoVersionsMiner class >> forPharo40 [
 	"
 	self forPharo40.
-	self forPharo40 fileOutVersionNamesByTag.
 	"
 
-	^ self forPharoTagPattern: '40*'
+	^ self forPharoTagRegex: '40\d\d\d' asRegex
 ]
 
 { #category : #'instance creation' }
 PharoVersionsMiner class >> forPharo50 [
 
-	^ self forPharoTagPattern: '50*'
+	^ self forPharoTagRegex: '50\d\d\d' asRegex
 ]
 
 { #category : #'instance creation' }
-PharoVersionsMiner class >> forPharoTagPattern: pharoTagPattern [
+PharoVersionsMiner class >> forPharoTagRegex: pharoTagRegex [
+
+	^ self forPharoTagsSatisfying: [ :each | pharoTagRegex matches: each ]
+]
+
+{ #category : #'instance creation' }
+PharoVersionsMiner class >> forPharoTagsSatisfying: aBlock [
 
 	| pharoGitRepoPath repository tags |
 	pharoGitRepoPath := 'pharo-core'.
+	
+	self flag: #todo. "clone automatically using libgit"
 	pharoGitRepoPath asFileReference exists ifFalse: [
 		self error: pharoGitRepoPath, ' does not exist. Generate it like:
 	git clone git@github.com:pharo-project/pharo-core.git' ].
 
 	repository := (LGitRepository on: pharoGitRepoPath asFileReference) open; yourself.
-	tags :=  repository tags select: [ :each | pharoTagPattern match: each ].
+	
+	"PULL"
+	LGitGlobal runSequence: [ 
+		(LGitRemote
+			of: repository
+			named: 'origin'
+			url: nil
+			fetchSpec: '+refs/heads/*:refs/remotes/origin/*') pull ].
+					
+	tags := repository tags select: aBlock.
 
 	^ self new
 		pharoCoreGitRepositoryPath: pharoGitRepoPath;
 		tags: tags;
 		run;
-		yourself.
+		yourself
 ]
 
 { #category : #private }
