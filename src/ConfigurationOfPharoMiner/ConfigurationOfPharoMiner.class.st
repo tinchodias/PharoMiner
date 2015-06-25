@@ -169,3 +169,21 @@ ConfigurationOfPharoMiner >> project [
 		project loadType: #linear. "change to #atomic if desired"
 		project ]
 ]
+
+{ #category : #versions }
+ConfigurationOfPharoMiner >> version10: spec [
+	<version: '1.0' imports: #('0.1-baseline' )>
+
+	spec for: #'common' do: [
+		spec blessing: #'development'.
+		spec description: 'version 1.0'.
+		spec author: 'MartinDias'.
+		spec timestamp: '6/25/2015 11:28'.
+		spec 
+			baseline: 'LibGit' with: 'baseline';
+			project: 'CI' with: #'stable'.
+		spec 
+			package: #PharoVersionsMiner with: 'PharoVersionsMiner-MartinDias.5';
+			package: #PharoMiner with: #PharoMiner. ].
+
+]
