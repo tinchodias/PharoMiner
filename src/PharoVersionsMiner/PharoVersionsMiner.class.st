@@ -65,11 +65,7 @@ PharoVersionsMiner class >> forPharoTagsSatisfying: aBlock [
 	
 	"PULL"
 	LGitGlobal runSequence: [ 
-		(LGitRemote
-			of: repository
-			named: 'origin'
-			url: nil
-			fetchSpec: '+refs/heads/*:refs/remotes/origin/*') pull ].
+		(LGitRemote of: repository named: 'origin') lookup pull ].
 					
 	tags := repository tags select: aBlock.
 
