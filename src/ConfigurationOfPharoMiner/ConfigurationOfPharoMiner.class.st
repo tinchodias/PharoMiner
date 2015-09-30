@@ -118,8 +118,7 @@ ConfigurationOfPharoMiner >> baseline01: spec [
 
 		spec baseline: 'LibGit' with: [
 			spec 
-				repository: 'github://theseion/LibGit:master';
-				loads: #('development') ].
+				repository: 'github://theseion/LibGit:master' ].
 
 		spec
 			project: 'CI' with: [
