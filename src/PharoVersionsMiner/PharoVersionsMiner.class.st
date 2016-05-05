@@ -55,18 +55,8 @@ PharoVersionsMiner class >> forPharoTagsSatisfying: aBlock [
 
 	| pharoGitRepoPath repository tags |
 	pharoGitRepoPath := 'pharo-core'.
-	
-	self flag: #todo. "clone automatically using libgit"
-	pharoGitRepoPath asFileReference exists ifFalse: [
-		self error: pharoGitRepoPath, ' does not exist. Generate it like:
-	git clone git@github.com:pharo-project/pharo-core.git' ].
-
-	repository := (LGitRepository on: pharoGitRepoPath asFileReference) open; yourself.
-	
-	"PULL"
-	LGitGlobal runSequence: [ 
-		(LGitRemote of: repository named: 'origin') lookup pull ].
-					
+	repository := self pharoCoreRepository.
+						
 	tags := repository tags select: aBlock.
 
 	^ self new
@@ -74,6 +64,39 @@ PharoVersionsMiner class >> forPharoTagsSatisfying: aBlock [
 		tags: tags;
 		run;
 		yourself
+]
+
+{ #category : #'instance creation' }
+PharoVersionsMiner class >> pharoCoreRepository [
+
+	| pharoGitRepoPath repository |
+	pharoGitRepoPath := 'pharo-core' asFileReference.
+
+	LGitGlobal runSequence: [
+		repository := LGitRepository on: pharoGitRepoPath.
+		(pharoGitRepoPath exists and: [ repository isProperRepository ])
+			ifFalse: [ 
+				repository
+					cloneHttps: 'https://github.com/pharo-project/pharo-core.git';
+					checkout: 'master' ]
+			ifTrue: [ 
+				| credentials credentialsCallback |
+				repository open.
+				credentials := LGitRemote credentialsSsh.
+				credentialsCallback := LGitCredAcquireCallback
+					on: [ :cred :url :username_from_url :allowed_types :data | 
+						credentials createWith: cred.
+						0 ].
+				(LGitRemote of: repository named: 'origin')
+					lookup;
+					pullWithFetchOptions: (LGitFetchOptions defaults
+						callbacks: (LGitRemoteCallbacks defaults
+							credentials: credentialsCallback;
+							yourself);
+						yourself).
+				repository fastForward ] ].
+					
+	^ repository
 ]
 
 { #category : #private }
