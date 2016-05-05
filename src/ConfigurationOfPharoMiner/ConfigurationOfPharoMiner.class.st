@@ -140,6 +140,38 @@ ConfigurationOfPharoMiner >> baseline01: spec [
 
 ]
 
+{ #category : #baselines }
+ConfigurationOfPharoMiner >> baseline02: spec [
+	<version: '0.2-baseline'>
+
+	spec for: #'common' do: [
+		spec blessing: #'baseline'.
+		spec repository: 'http://smalltalkhub.com/mc/MartinDias/PharoMiner/main/'.
+
+		spec baseline: 'LibGit' with: [
+			spec 
+				repository: 'github://jvdsandt/LibGit:pharo50' ].
+
+		spec
+			project: 'CI' with: [
+				spec
+					className: #ConfigurationOfCI;
+					versionString: #stable;
+					repository: 'http://smalltalkhub.com/mc/Pharo/ci/main' ].
+
+		spec package: #PharoVersionsMiner with: [
+			spec requires: #('LibGit') ].
+		spec package: #PharoMiner with: [
+			spec requires: #('CI' 'PharoVersionsMiner') ].
+		
+		spec
+			group: 'default' with: #('PharoMiner');
+			group: 'core' with: #('PharoVersionsMiner').
+	
+	 ].
+
+]
+
 { #category : #accessing }
 ConfigurationOfPharoMiner >> customProjectAttributes [
 	 "Edit to return a collection of any custom attributes e.g. for conditional loading: Array with: #'Condition1' with: #'Condition2.
