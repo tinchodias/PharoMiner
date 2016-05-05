@@ -150,7 +150,8 @@ ConfigurationOfPharoMiner >> baseline02: spec [
 
 		spec baseline: 'LibGit' with: [
 			spec 
-				repository: 'github://jvdsandt/LibGit:pharo50' ].
+				repository: 'github://jvdsandt/LibGit:pharo50';
+				loads: #('development') ].
 
 		spec
 			project: 'CI' with: [
