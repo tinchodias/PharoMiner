@@ -173,6 +173,33 @@ ConfigurationOfPharoMiner >> baseline02: spec [
 
 ]
 
+{ #category : #baselines }
+ConfigurationOfPharoMiner >> baseline03: spec [
+	<version: '0.3-baseline'>
+
+	spec for: #'common' do: [
+		spec blessing: #'baseline'.
+		spec repository: 'http://smalltalkhub.com/mc/MartinDias/PharoMiner/main/'.
+
+		spec
+			project: 'CI' with: [
+				spec
+					className: #ConfigurationOfCI;
+					versionString: #stable;
+					repository: 'http://smalltalkhub.com/mc/Pharo/ci/main' ].
+
+		spec package: #PharoVersionsMiner.
+		spec package: #PharoMiner with: [
+			spec requires: #('CI' 'PharoVersionsMiner') ].
+		
+		spec
+			group: 'default' with: #('PharoMiner');
+			group: 'core' with: #('PharoVersionsMiner').
+	
+	 ].
+
+]
+
 { #category : #accessing }
 ConfigurationOfPharoMiner >> customProjectAttributes [
 	 "Edit to return a collection of any custom attributes e.g. for conditional loading: Array with: #'Condition1' with: #'Condition2.
@@ -185,7 +212,8 @@ ConfigurationOfPharoMiner >> customProjectAttributes [
 ConfigurationOfPharoMiner >> development: spec [
 	<symbolicVersion: #'development'>
 
-	spec for: #'common' version: '0.2-baseline'.
+	spec for: #'pharo5.x' version: '0.2-baseline'.
+	spec for: #'pharo6.x' version: '0.3-baseline'.
 
 ]
 
