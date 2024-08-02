@@ -1,8 +1,13 @@
 # Pharo Miner
 
-Most recent usage info is:
+The purpose of this project is gathering evolution information of [Pharo](https://pharo.org/): all the intermediate versions between releases, and the associated issue discussions of each evolution step.
+
+This code is outdated. The most recent usage info is:
 
 ```smalltalk
+
+    "Install script:"
+
     Gofer it
             smalltalkhubUser: 'MartinDias'
             project: 'PharoMiner';
@@ -91,11 +96,11 @@ Most recent usage info is:
 ## History
 
 This codebase was recovered from SmalltalkHub.
-Original repository: http://smalltalkhub.com/MartinDias/PharoMiner
-Migration tool: https://github.com/pharo-contributions/git-migration
+* Source repository: http://smalltalkhub.com/MartinDias/PharoMiner
+* Migration tool: https://github.com/pharo-contributions/git-migration
 
+Script:
 ```smalltalk
-"Pharo"
 migration := GitMigration on: 'MartinDias/PharoMiner'.
 migration onEmptyMessage: [ :info | 'empty commit message' ].
 migration downloadAllVersions.
