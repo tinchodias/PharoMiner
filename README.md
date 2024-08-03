@@ -10,6 +10,7 @@ Metacello new
         baseline: 'PharoMiner';
         repository: 'github://tinchodias/PharoMiner';
         load.
+```
 
 Download all Pharo 3 mcz to your disk (drink some mate meanwhile):
 ```smalltalk
@@ -21,7 +22,7 @@ Clone pharo-core git repo (drink more mate now):
 PharoVersionsMiner pharoCoreRepository
 ```
 
-## Usage: some queries
+## Do some queries
 
 ```smalltalk
 slicesMiner := PharoSlicesMiner forPharo30.
