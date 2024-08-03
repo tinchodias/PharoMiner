@@ -72,29 +72,14 @@ PharoVersionsMiner class >> pharoCoreRepository [
 	| pharoGitRepoPath repository |
 	pharoGitRepoPath := 'pharo-core' asFileReference.
 
-	LGitGlobal runSequence: [
-		repository := LGitRepository on: pharoGitRepoPath.
-		(pharoGitRepoPath exists and: [ repository isProperRepository ])
-			ifFalse: [ 
-				repository
-					cloneHttps: 'https://github.com/pharo-project/pharo-core.git';
-					checkout: 'master' ]
-			ifTrue: [ 
-				| credentials credentialsCallback |
-				repository open.
-				credentials := LGitRemote credentialsSsh.
-				credentialsCallback := LGitCredAcquireCallback
-					on: [ :cred :url :username_from_url :allowed_types :data | 
-						credentials createWith: cred.
-						0 ].
-				(LGitRemote of: repository named: 'origin')
-					lookup;
-					pullWithFetchOptions: (LGitFetchOptions defaults
-						callbacks: (LGitRemoteCallbacks defaults
-							credentials: credentialsCallback;
-							yourself);
-						yourself).
-				repository fastForward ] ].
+	repository := LGitRepository on: pharoGitRepoPath.
+	(pharoGitRepoPath exists and: [ repository isProperRepository ])
+		ifTrue: [ 'Reusing cloned Pharo-Core.' traceCr ]
+		ifFalse: [
+			'Cloning Pharo-Core repository...' traceCr.
+			repository
+				cloneHttps: 'https://github.com/pharo-project/pharo-core.git'.
+			'Clone done.' traceCr ].
 					
 	^ repository
 ]
@@ -115,12 +100,12 @@ PharoVersionsMiner >> commitForTag: aTag [
 { #category : #private }
 PharoVersionsMiner >> contentAt: aPath from: aLGitCommit ifPresent: presentBlock ifAbsent: absentBlock [
 
-	^ aLGitCommit
-		lookupByPath: aPath
-		type: LGitObjectTypeEnum GIT_OBJ_BLOB
-		ifPresent: [ :blob |
-			presentBlock cull: blob contents ]
-		ifAbsent: absentBlock
+	| entry |
+	entry := aLGitCommit
+		entryByPath: aPath
+		ifAbsent: [ ^ absentBlock value ].
+
+	^ presentBlock cull: entry object contents
 ]
 
 { #category : #private }
@@ -139,16 +124,8 @@ PharoVersionsMiner >> contentAtAnyOf: paths from: aLGitCommit ifPresent: present
 { #category : #convenience }
 PharoVersionsMiner >> fileOutVersionNamesByTag [
 
-	"
-	Gofer it
-		url: 'http://ss3.gemstone.com/ss/STON';
-		configurationOf: 'Ston';
-		load.
-	#ConfigurationOfSton asClass load.
-	"
-
 	'versionNamesByTag.ston' asFileReference writeStreamDo: [ :stream |
-		#STON asClass
+		STON
 			put: self versionNamesByTag
 			onStreamPretty: stream ]
 ]

@@ -150,7 +150,7 @@ PharoSlicesMiner >> versionsByNumber [
 			inject: Dictionary new
 			into: [ :acum :each | 
 				(acum 
-					at: (each name splitOn: '-') third 
+					at: (each info name splitOn: '-') third
 					ifAbsentPut: [ SortedCollection sortBlock: [ :a :b | a info timeStamp < b info timeStamp ] ]) 
 					add: each.
 				acum ] ]
