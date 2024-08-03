@@ -33,7 +33,7 @@ fogbugzMiner :=
                         (FogBugzTracker pharo
                                 logOnWithEmail: '???'
                                 password: '???');
-                issueNumbers: slicesMiner versionsByNumber keys
+                issueNumbers: slicesMiner versionsByNumber keys;
                 yourself.
 4 timesRepeat: [ fogbugzMiner run ].
 
@@ -48,6 +48,8 @@ slicesMiner versionsByNumber keysAndValuesDo: [ :number :slices |
                 at: number
                 put: (versionsMiner selectTagsForSlice: slices anyOne) ].
 
+
+"---"
 
 "Fogbugz FRN events matches "
 outdatedContributions :=
